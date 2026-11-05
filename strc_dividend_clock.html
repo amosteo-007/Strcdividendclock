@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>STRC DIVIDEND CLOCK</title>
+<style>
+  :root{
+    --green:#8dff3b; --green-dim:#4a7a1e; --amber:#ffd75e; --bg:#04070d;
+    --panel:#0a1018; --border:#23304a; --label:#9fb3d1; --red:#ff5c5c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:#e8eef7;font-family:'Segoe UI',Arial,sans-serif;-webkit-text-size-adjust:100%}
+  .mono{font-family:'Consolas','Menlo','Courier New',monospace}
+  header{border-bottom:2px solid var(--border);background:linear-gradient(#0d1622,#070c14);padding:10px 12px;text-align:center}
+  header h1{color:var(--green);font-size:20px;letter-spacing:2px}
+  header .sub{color:var(--label);font-size:11px;margin-top:3px}
+  .clockbar{display:flex;justify-content:space-between;padding:6px 12px;background:#0a1220;border-bottom:1px solid var(--border);font-size:11px;color:var(--label)}
+  .clockbar .mono{color:var(--amber)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:8px 10px;text-align:center;box-shadow:inset 0 0 12px rgba(0,0,0,.6)}
+  .panel.wide{grid-column:1/-1}
+  .label{font-size:10px;letter-spacing:1px;color:var(--label);text-transform:uppercase}
+  .value{color:var(--green);font-size:17px;margin-top:4px;text-shadow:0 0 8px rgba(141,255,59,.35);white-space:nowrap}
+  .panel.hero .value{font-size:26px}
+  .value.small{font-size:15px}
+  .value.warn{color:var(--amber)}
+  .note{font-size:9px;color:#5c6f8d;margin-top:3px}
+  footer{padding:10px 12px;font-size:9.5px;color:#5c6f8d;line-height:1.5;border-top:1px solid var(--border)}
+  .flash{animation:flash 1s step-start infinite}
+  @keyframes flash{0%,49%{opacity:1}50%,100%{opacity:0}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="mono">STRC DIVIDEND CLOCK</h1>
+  <div class="sub">STRATEGY INC &middot; VARIABLE RATE SERIES A PERPETUAL STRETCH PREFERRED STOCK</div>
+</header>
+
+<div class="clockbar mono">
+  <span id="datetxt">--</span>
+  <span>DAILY PAYMENT REGIME SINCE 01-NOV-2026</span>
+  <span id="timetxt" class="mono">--:--:--</span>
+</div>
+
+<div class="grid">
+  <div class="panel wide hero">
+    <div class="label">STRC dividends accrued since you opened this page</div>
+    <div class="value mono" id="sinceLoad">$0.00</div>
+    <div class="note">Illustrative 24/7 accrual &middot; actual payments follow board declaration &amp; business-day schedule</div>
+  </div>
+
+  <div class="panel">
+    <div class="label">Accrued today &middot; all shares</div>
+    <div class="value mono" id="todayAgg">--</div>
+    <div class="note" id="todayPct">--</div>
+  </div>
+  <div class="panel">
+    <div class="label">Accrued today &middot; per share</div>
+    <div class="value mono" id="todayShare">--</div>
+    <div class="note">of ~$0.0329 per full day</div>
+  </div>
+  <div class="panel">
+    <div class="label">Accrued since 1 Nov 2026 (daily regime)</div>
+    <div class="value mono small" id="sinceDaily">--</div>
+    <div class="note" id="daysDaily">--</div>
+  </div>
+  <div class="panel">
+    <div class="label">Accrued year to date 2026 &middot; est.</div>
+    <div class="value mono small" id="ytd">--</div>
+    <div class="note">Blended: 11.50% Jan–Jun, 12.00% Jul–Dec</div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="panel"><div class="label">STRC price <span class="flash" style="color:var(--red)">&#9679;</span></div><div class="value mono small" id="price">--</div><div class="note" id="priceYoY">Last close 3-Nov-2026</div></div>
+  <div class="panel"><div class="label">Current dividend rate</div><div class="value mono small" id="rate">--</div><div class="note">Variable &middot; reviewed monthly</div></div>
+  <div class="panel"><div class="label">Shares outstanding</div><div class="value mono small" id="shares">--</div><div class="note">Implied by $8.12B mkt cap</div></div>
+  <div class="panel"><div class="label">Stated amount (par)</div><div class="value mono small" id="par">--</div><div class="note">No issuance below $100 policy</div></div>
+  <div class="panel"><div class="label">Market capitalization</div><div class="value mono small" id="mktcap">--</div><div class="note">strategy.com, 3-Nov-2026</div></div>
+  <div class="panel"><div class="label">Effective yield at $100</div><div class="value mono small" id="yield2">--</div><div class="note">$12 annual / $100</div></div>
+  <div class="panel"><div class="label">Dividend per share / day</div><div class="value mono small" id="dpsDay">--</div><div class="note">$12.00 &divide; 365</div></div>
+  <div class="panel"><div class="label">Dividend per share / year</div><div class="value mono small" id="dpsYr">--</div><div class="note">12% &times; $100 stated</div></div>
+  <div class="panel"><div class="label">All shares per second</div><div class="value mono small" id="aggSec">--</div><div class="note">continuous accrual</div></div>
+  <div class="panel"><div class="label">All shares per minute</div><div class="value mono small" id="aggMin">--</div><div class="note">continuous accrual</div></div>
+  <div class="panel"><div class="label">All shares per hour</div><div class="value mono small" id="aggHour">--</div><div class="note">continuous accrual</div></div>
+  <div class="panel"><div class="label">All shares per day</div><div class="value mono small" id="aggDay">--</div><div class="note">incl. weekends &amp; holidays</div></div>
+  <div class="panel"><div class="label">All shares per month (30d)</div><div class="value mono small" id="aggMo">--</div><div class="note">continuous accrual</div></div>
+  <div class="panel"><div class="label">Annual dividend cost to Strategy</div><div class="value warn mono small" id="aggYr">--</div><div class="note">At current rate &amp; share count</div></div>
+  <div class="panel"><div class="label">1 BTC of dividends lasts</div><div class="value mono small" id="btcDays">--</div><div class="note">at BTC = $100,000 assumption</div></div>
+  <div class="panel"><div class="label">Daily payout via STRC vs. stack</div><div class="value mono small" id="stackShare">--</div><div class="note">STRC only; STRF/STRK/STRD daily from Jan-2027</div></div>
+</div>
+
+<footer>
+  <strong style="color:#8fa5c4">How it works:</strong> $100 stated amount &times; 12.00% annual rate = $12/year = ~3.3 cents per share per day, accruing every calendar day and paid the next business day (daily regime approved 28-Oct-2026, effective 1-Nov-2026). Counters assume ~81.29M shares outstanding and continuous accrual.<br><br>
+  <strong style="color:#8fa5c4">Caveats:</strong> Dividends are cumulative but payable only as declared from legally available funds. Rate is variable and reviewed monthly (cuts limited to 25bps/month plus SOFR decline per company policy). Preferred securities are unsecured and not backed by Strategy's bitcoin. YTD figure assumes 11.50% Jan–Jun and 12.00% Jul–Dec on a constant share count — actuals differ as the ATM program issues new shares. Estimates only, not investment advice. Market data as of 3–4 Nov 2026.
+</footer>
+
+<script>
+var CONFIG = {
+  statedAmount: 100,          // USD per share
+  annualRate:   0.12,         // 12.00% current
+  shares:       81290000,     // ~$8.123B mkt cap / $99.93
+  price:        99.93,        // close 3-Nov-2026
+  dailyRegimeStart: new Date(2026, 10, 1),   // 1-Nov-2026
+  ytdSchedule: [              // [startDate, endDate-exclusive, annualRate]
+    [new Date(2026,0,1), new Date(2026,6,1), 0.115],
+    [new Date(2026,6,1), new Date(2026,11,31,23,59,59,999), 0.12]
+  ],
+  btcAssumption: 100000
+};
+
+var loadTime = Date.now();
+var perShareSec = CONFIG.statedAmount * CONFIG.annualRate / 365 / 86400;
+var aggSec = perShareSec * CONFIG.shares;
+
+function fmt(n, d){ return n.toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+function fmtMoney(n){ return '$' + fmt(n, 2); }
+function fmtBig(n){ if(n>=1e9) return '$'+fmt(n/1e9,3)+'B'; if(n>=1e6) return '$'+fmt(n/1e6,3)+'M'; if(n>=1e3) return '$'+fmt(n/1e3,2)+'K'; return fmtMoney(n); }
+function midnight(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
+function accrued(from, to){
+  var msBase = 86400000, total=0;
+  for(var i=0;i<CONFIG.ytdSchedule.length;i++){
+    var s=CONFIG.ytdSchedule[i][0], e=CONFIG.ytdSchedule[i][1], r=CONFIG.ytdSchedule[i][2];
+    var a=Math.max(from.getTime(), s.getTime()), b=Math.min(to.getTime(), e.getTime());
+    if(b>a) total += CONFIG.shares*CONFIG.statedAmount*r/365 * ((b-a)/msBase);
+  }
+  return total;
+}
+function tick(){
+  var now=new Date(), sec=(Date.now())/1000;
+  var dAgo=['SUN','MON','TUE','WED','THU','FRI','SAT'][now.getDay()];
+  document.getElementById('datetxt').textContent = dAgo+' '+now.toLocaleDateString('en-GB');
+  document.getElementById('timetxt').textContent = now.toLocaleTimeString('en-GB');
+  document.getElementById('sinceLoad').textContent = fmtMoney((Date.now()-loadTime)/1000*aggSec);
+  var todayAmt = aggSec*86400*((now-midnight())/86400);
+  document.getElementById('todayAgg').textContent = fmtMoney(todayAmt);
+  document.getElementById('todayPct').textContent = fmt((now-midnight())/86400*100,1)+'% of the day elapsed';
+  document.getElementById('todayShare').textContent = '$'+fmt(perShareSec*86400*((now-midnight())/86400),5);
+  var sd = accrued(CONFIG.dailyRegimeStart, now);
+  document.getElementById('sinceDaily').textContent = fmtMoney(sd);
+  document.getElementById('daysDaily').textContent = fmt((now-CONFIG.dailyRegimeStart)/86400000,2)+' days since regime start';
+  document.getElementById('ytd').textContent = fmtMoney(accrued(new Date(now.getFullYear(),0,1), now));
+  requestAnimationFrame(tick);
+}
+function statics(){
+  document.getElementById('price').textContent = fmtMoney(CONFIG.price);
+  document.getElementById('rate').textContent = (CONFIG.annualRate*100).toFixed(2)+'%';
+  document.getElementById('shares').textContent = fmt(CONFIG.shares/1e6,2)+'M';
+  document.getElementById('par').textContent = fmtMoney(CONFIG.statedAmount);
+  document.getElementById('mktcap').textContent = fmtBig(CONFIG.shares*CONFIG.price);
+  document.getElementById('yield2').textContent = (CONFIG.annualRate/CONFIG.price*100*100).toFixed(2)+'%';
+  document.getElementById('dpsDay').textContent = fmtMoney(perShareSec*86400);
+  document.getElementById('dpsYr').textContent = fmtMoney(CONFIG.statedAmount*CONFIG.annualRate);
+  document.getElementById('aggSec').textContent = fmtMoney(aggSec);
+  document.getElementById('aggMin').textContent = fmtMoney(aggSec*60);
+  document.getElementById('aggHour').textContent = fmtMoney(aggSec*3600);
+  document.getElementById('aggDay').textContent = fmtMoney(aggSec*86400);
+  document.getElementById('aggMo').textContent = fmtBig(aggSec*86400*30);
+  document.getElementById('aggYr').textContent = fmtBig(aggSec*86400*365);
+  document.getElementById('btcDays').textContent = fmt(CONFIG.btcAssumption/(aggSec*86400),2)+' days';
+  document.getElementById('stackShare').textContent = '~'+fmt(aggSec*86400/(aggSec*86400),1)+' of STRC alone';
+}
+statics(); tick();
+</script>
+</body>
+</html>
