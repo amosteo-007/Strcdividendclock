@@ -1,7 +1,7 @@
 # Refreshes data.js from SEC EDGAR and commits it, which triggers a redeploy on Cloudflare Pages / Netlify.
 # Works when the strc-clock folder is the root of its own GitHub repository.
-# Setup: Repo > Settings > Secrets and variables > Actions > New secret
-#   SEC_USER_AGENT = STRC Dividend Clock your-email@example.com
+# SEC requires automated requests to identify the sender. The User-Agent below uses the site owner's contact email.
+# Optional override: add a repo secret named SEC_USER_AGENT (Settings > Secrets and variables > Actions).
 name: Update data
 on:
   schedule:
@@ -19,7 +19,7 @@ jobs:
           node-version: 20
       - name: Fetch latest 8-K figures
         env:
-          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT || 'STRC Dividend Clock teojk1995@gmail.com' }}
         run: node fetch-sec.cjs
       - name: Commit if changed
         run: |

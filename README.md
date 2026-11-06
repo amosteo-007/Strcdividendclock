@@ -33,7 +33,7 @@ The accrual counters are calculations from a fixed share count and rate, not liv
 SEC_USER_AGENT="STRC Dividend Clock you@example.com" node fetch-sec.cjs
 ```
 
-For the GitHub Action, add a repository secret named `SEC_USER_AGENT` with the same text (Settings > Secrets and variables > Actions). The workflow runs every 6 hours and commits `data.js` only when it changes. Weekly 8-Ks update roughly weekly, so this is not tick-by-tick.
+The GitHub Action already identifies itself with the site owner's contact email, so no setup is needed. To use a different identity, add a repository secret named `SEC_USER_AGENT` (Settings > Secrets and variables > Actions); it overrides the default. The workflow runs every 6 hours and commits `data.js` only when it changes. Weekly 8-Ks update roughly weekly, so this is not tick-by-tick.
 
 **Manual (everything else).** MSTR market cap, annual interest + dividends, STRC price and share count are not in SEC filings. Update them in `CONFIG` in `index.html` together with their `asOf` dates.
 
@@ -44,7 +44,3 @@ Hosted on Cloudflare (Workers static assets) from this repo's root. Automatic re
 ## Ads
 
 Google AdSense is loaded from the `<head>` of `index.html`. Enable Auto ads (including Anchor ads) and the consent message in the AdSense dashboard after approval.
-
-## Notes
-
-`strc_dividend_clock.html` is an older copy of the page kept from the first commit and is not linked from the site.
