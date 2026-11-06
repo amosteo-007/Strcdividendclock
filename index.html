@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>STRC DIVIDEND CLOCK</title>
+<style>
+  :root{
+    --orange:#ff6b0f; --green:#ff6b0f; --amber:#ff6b0f; --bg:#000;
+    --card:#0f0f10; --panel:#0f0f10; --border:#2b2b2e; --label:#e6e6e6; --muted:#a7a7a7; --dim:#7a7a7a;
+    --red:#ff5c5c; --blue:#4f8cff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:#fff;font-family:'Montserrat','Segoe UI',Arial,sans-serif;-webkit-text-size-adjust:100%}
+  body{padding-bottom:64px}
+  .mono{font-family:'Consolas','Menlo','Courier New',monospace}
+  header{background:var(--orange);padding:12px 16px;text-align:left}
+  header h1{color:#000;font-size:22px;letter-spacing:.5px;font-weight:800;font-family:inherit}
+  header .sub{color:rgba(0,0,0,.78);font-size:11px;margin-top:2px;font-weight:600}
+  .clockbar{display:flex;justify-content:space-between;gap:8px;padding:9px 16px;background:#141414;border-bottom:1px solid var(--border);font-size:11px;color:var(--orange);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+  .clockbar .mono{color:#fff}
+  .headline,.grid,.reservoir,.sources,footer{max-width:1200px;margin-left:auto;margin-right:auto}
+  .headline{padding:18px 16px 8px}
+  .headline h2{font-size:26px;line-height:1.15;font-weight:800;color:#fff}
+  .headline h2 em{font-style:normal;color:var(--orange)}
+  .headline .cap{margin-top:8px;font-size:12px;color:var(--muted);line-height:1.5}
+  .headline .cap b{color:#fff}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 12px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left}
+  .panel.wide{grid-column:1/-1}
+  .label{font-size:12px;font-weight:600;color:var(--label)}
+  .value{color:#fff;font-size:24px;font-weight:700;margin-top:4px;white-space:nowrap}
+  .value.mono{font-family:inherit}
+  .panel.hero{border:1.5px solid #3a3a3d}
+  .panel.hero .value{font-size:36px;color:#fff}
+  .value.small{font-size:20px}
+  .value.warn{color:var(--orange)}
+  .note{font-size:10px;color:var(--dim);margin-top:4px;line-height:1.4}
+  .sources{padding:6px 16px;font-size:11px;color:var(--muted);line-height:1.6}
+  .sources b{color:#fff}
+  .sources a{color:var(--orange)}
+  footer{padding:12px 16px;font-size:10px;color:var(--dim);line-height:1.6;border-top:1px solid var(--border)}
+  .explainer{padding:14px 16px;border-top:1px solid var(--border);margin-top:6px}
+  .explainer h2{font-size:22px;font-weight:800;color:#fff;margin-bottom:10px}
+  .explainer h3{font-size:14px;font-weight:700;color:var(--orange);margin:0 0 4px}
+  .explainer p{font-size:13px;line-height:1.65;color:#cfcfcf}
+  .explainer b{color:#fff}
+  .excols{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:16px}
+  .faq{margin-top:6px}
+  .faq h2{font-size:18px;margin:10px 0 6px}
+  .faq details{border-top:1px solid var(--border);padding:8px 0}
+  .faq summary{cursor:pointer;font-weight:600;font-size:13px;color:#fff}
+  .faq details p{margin-top:6px}
+  @media(min-width:900px){.excols{grid-template-columns:1fr 1fr 1fr}}
+  /* Sample ad preview: shown at ALL widths for now. Final plan: mobile only (wrap in @media(max-width:768px)). */
+  .ad-sticky{display:flex;position:fixed;left:0;right:0;bottom:0;height:60px;z-index:20;background:#141414;border-top:1px solid var(--border);align-items:center;justify-content:center}
+  .ad-sticky .slot{position:relative;width:320px;height:50px;overflow:hidden;border-radius:4px}
+  .ad-sticky .tagad{position:absolute;top:0;right:0;font-size:8px;line-height:1;padding:2px 4px;background:rgba(0,0,0,.55);color:#ddd;border-bottom-left-radius:4px;z-index:2}
+  .creative{position:absolute;inset:0;display:flex;align-items:center;gap:10px;padding:0 12px;opacity:0;transition:opacity .5s;font-weight:700;color:#fff}
+  .creative.on{opacity:1}
+  .creative .ic{font-size:22px}
+  .creative .tx{font-size:12px;line-height:1.2}
+  .creative .tx small{display:block;font-weight:500;font-size:10px;opacity:.85}
+  .creative .cta{margin-left:auto;font-size:10px;background:#fff;color:#000;border-radius:3px;padding:4px 8px}
+  .c1{background:linear-gradient(90deg,#1b2a6b,#3a56d4)}
+  .c2{background:linear-gradient(90deg,#0b6b4a,#16b07a)}
+  .c3{background:linear-gradient(90deg,#6b1b4a,#d43a8a)}
+  @media(max-width:480px){
+    .value{font-size:18px;white-space:normal;overflow-wrap:anywhere}
+    .value.small{font-size:16px}
+    .panel.hero .value{font-size:30px}
+    .clockbar span:nth-child(2){display:none}
+    .headline h2{font-size:22px}
+  }
+  @media(min-width:900px){
+    .grid{grid-template-columns:repeat(4,1fr)}
+    .headline h2{font-size:36px}
+  }
+  .reservoir{margin:0 auto 10px;width:calc(100% - 24px);position:relative}
+  .reservoir.panel{background:var(--card);border-color:var(--border);padding:12px 6px}
+  .reservoir .label{color:var(--label);padding:0 8px}
+  .reservoir svg{width:100%;height:auto;max-height:460px;display:block}
+  .drop{animation:drip 1s ease-in infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes drip{0%{transform:translateY(0) scale(.5);opacity:0}15%{opacity:1;transform:translateY(0) scale(1)}100%{transform:translateY(20px);opacity:1}}
+  .coin{animation:belt 4s linear infinite;opacity:0}
+  @keyframes belt{0%{transform:translateX(0);opacity:0}8%{opacity:1}85%{opacity:1}100%{transform:translateX(150px);opacity:0}}
+  .shimmer{animation:shim 3.5s ease-in-out infinite alternate}
+  @keyframes shim{from{opacity:.55}to{opacity:.95}}
+  .hot{cursor:pointer}
+  #tip{position:fixed;pointer-events:none;background:#141414;border:1px solid var(--green);border-radius:4px;padding:6px 9px;font-size:12px;color:#e8eef7;z-index:9;display:none;max-width:250px;box-shadow:0 4px 14px rgba(0,0,0,.6)}
+  #tip b{color:var(--green)}
+  .resmeta{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;font-size:11px;color:var(--muted);padding:2px 8px}
+  .resmeta b{color:#fff}
+  .flash{animation:flash 1s step-start infinite}
+  @keyframes flash{0%,49%{opacity:1}50%,100%{opacity:0}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="mono">STRC DIVIDEND CLOCK</h1>
+  <div class="sub">STRATEGY INC &middot; VARIABLE RATE SERIES A PERPETUAL STRETCH PREFERRED STOCK</div>
+</header>
+
+<div class="clockbar mono">
+  <span id="datetxt">--</span>
+  <span>DAILY PAYMENT REGIME SINCE 01-NOV-2026</span>
+  <span id="timetxt" class="mono">--:--:--</span>
+</div>
+
+<section class="headline">
+  <h2>STRC drains <em id="hlRate">$--/sec</em> from Strategy's <em id="hlUsd">$--B</em> dollar reserve</h2>
+  <p class="cap" id="hlCap">--</p>
+</section>
+
+<div class="reservoir panel" style="padding:8px 4px">
+  <div class="label">Strategy balance sheet &middot; MSTR stock refills the USD tank, STRC leaks it</div>
+  <svg id="resSvg" viewBox="-44 0 742 330" role="img" aria-label="Two glass tanks: USD reserve (blue) and MSTR equity (amber). STRC dividends leak from the USD reserve onto a conveyor belt.">
+    <g transform="translate(0,0)">
+    <ellipse cx="170" cy="236" rx="150" ry="14" fill="#000" fill-opacity=".6"/>
+    <polygon points="40,230 220,230 290,180 110,180" fill="#0e1a33" stroke="#4f8cff" stroke-width="2"/>
+    <g stroke="#4f8cff" stroke-opacity=".5" stroke-width="1"><line x1="40.0" y1="230" x2="110.0" y2="180"/><line x1="40.0" y1="230.0" x2="220.0" y2="230.0"/><line x1="100.0" y1="230" x2="170.0" y2="180"/><line x1="63.33333333333333" y1="213.33333333333334" x2="243.33333333333334" y2="213.33333333333334"/><line x1="160.0" y1="230" x2="230.0" y2="180"/><line x1="86.66666666666666" y1="196.66666666666669" x2="266.6666666666667" y2="196.66666666666669"/><line x1="220.0" y1="230" x2="290.0" y2="180"/><line x1="110.0" y1="180.0" x2="290.0" y2="180.0"/></g>
+    <g id="rsL"><polygon id="rsB" fill="#6f9bf0"/><polygon id="rsS" class="hot" data-tip="res" fill="#3a68cf"/><polygon id="rsF" class="hot" data-tip="res" fill="#4f82ec"/><polygon id="rsT" class="hot shimmer" data-tip="res" fill="#9fc0ff"/></g><g id="csL"><polygon id="csB" fill="#5aa9d6"/><polygon id="csS" class="hot" data-tip="cash" fill="#7fc0e8"/><polygon id="csF" class="hot" data-tip="cash" fill="#9fd4f5"/><polygon id="csT" class="hot shimmer" data-tip="cash" fill="#d6efff"/></g>
+    <g fill="none" stroke="#ffffff" stroke-width="1.6" stroke-opacity=".9" pointer-events="none">
+      <rect x="40" y="90" width="180" height="140"/>
+      <polyline points="40,90 110,40 290,40 220,90"/>
+      <line x1="290" y1="40" x2="290" y2="180"/><line x1="220" y1="230" x2="290" y2="180"/>
+      <line x1="110" y1="40" x2="110" y2="180" stroke-opacity=".5"/>
+    </g>
+    <g fill="#fff" fill-opacity=".25" pointer-events="none"><polygon points="60,92 78,92 58,228 46,228"/><polygon points="150,92 160,92 140,228 132,228"/></g>
+    <g pointer-events="none"><line id="tagLn" x1="0" x2="40" stroke="#4f8cff" stroke-width="1.5"/>
+      <rect id="tagR" x="-42" width="50" height="22" rx="4" fill="#0b1a33" stroke="#4f8cff" stroke-width="1.5"/>
+      <text id="tagT" x="-17" text-anchor="middle" font-size="10" font-weight="700" fill="#bcd4ff" class="mono">--</text></g>
+  </g>
+    <g transform="translate(340,0)">
+    <ellipse cx="170" cy="236" rx="150" ry="14" fill="#000" fill-opacity=".6"/>
+    <polygon points="40,230 220,230 290,180 110,180" fill="#2b1707" stroke="#ff6b0f" stroke-width="2"/>
+    <g stroke="#ff6b0f" stroke-opacity=".5" stroke-width="1"><line x1="40.0" y1="230" x2="110.0" y2="180"/><line x1="40.0" y1="230.0" x2="220.0" y2="230.0"/><line x1="100.0" y1="230" x2="170.0" y2="180"/><line x1="63.33333333333333" y1="213.33333333333334" x2="243.33333333333334" y2="213.33333333333334"/><line x1="160.0" y1="230" x2="230.0" y2="180"/><line x1="86.66666666666666" y1="196.66666666666669" x2="266.6666666666667" y2="196.66666666666669"/><line x1="220.0" y1="230" x2="290.0" y2="180"/><line x1="110.0" y1="180.0" x2="290.0" y2="180.0"/></g>
+    <g id="msL"><polygon id="msB" fill="#d9560a"/><polygon id="msS" class="hot" data-tip="mstr" fill="#ff6b0f"/><polygon id="msF" class="hot" data-tip="mstr" fill="#ff8a3d"/><polygon id="msT" class="hot shimmer" data-tip="mstr" fill="#ffb27a"/></g>
+    <g fill="none" stroke="#ffffff" stroke-width="1.6" stroke-opacity=".9" pointer-events="none">
+      <rect x="40" y="90" width="180" height="140"/>
+      <polyline points="40,90 110,40 290,40 220,90"/>
+      <line x1="290" y1="40" x2="290" y2="180"/><line x1="220" y1="230" x2="290" y2="180"/>
+      <line x1="110" y1="40" x2="110" y2="180" stroke-opacity=".5"/>
+    </g>
+    <g fill="#fff" fill-opacity=".25" pointer-events="none"><polygon points="60,92 78,92 58,228 46,228"/><polygon points="150,92 160,92 140,228 132,228"/></g>
+    <g pointer-events="none"><line id="mtagLn" x1="290" x2="302" stroke="#ff6b0f" stroke-width="1.5"/>
+      <rect id="mtagR" x="302" width="50" height="22" rx="4" fill="#2a1204" stroke="#ff6b0f" stroke-width="1.5"/>
+      <text id="mtagT" x="327" text-anchor="middle" font-size="10" font-weight="700" fill="#ffb27a" class="mono">--</text></g>
+  </g>
+    <!-- ATM pipe: MSTR (amber) -> USD reserve (blue) -->
+    <path id="atmPipe" d="M382 205 H335 V62 H190 V84" fill="none" stroke="#777" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M382 205 H335 V62 H190 V84" fill="none" stroke="#222" stroke-width="3" stroke-linejoin="round"/>
+    <circle r="3.5" fill="#ff6b0f"><animateMotion dur="5s" repeatCount="indefinite" begin="0s"><mpath href="#atmPipe"/></animateMotion></circle>
+    <circle r="3.5" fill="#ff6b0f"><animateMotion dur="5s" repeatCount="indefinite" begin="-1.7s"><mpath href="#atmPipe"/></animateMotion></circle>
+    <circle r="3.5" fill="#ff6b0f"><animateMotion dur="5s" repeatCount="indefinite" begin="-3.4s"><mpath href="#atmPipe"/></animateMotion></circle>
+    <rect x="304" y="108" width="62" height="40" rx="6" fill="#ff6b0f" stroke="#b84a00" stroke-width="1.5"/>
+    <text x="335" y="125" text-anchor="middle" font-size="9" font-weight="700" fill="#000" class="mono">ATM</text>
+    <text x="335" y="138" text-anchor="middle" font-size="7.5" fill="#2b1100" class="mono">MSTR&#8594;USD</text>
+    <!-- STRC leak -->
+    <rect x="122" y="228" width="16" height="16" rx="2" fill="#4f8cff" stroke="#9fc0ff"/>
+    <rect class="hot" data-tip="leak" x="108" y="226" width="44" height="70" fill="transparent"/>
+    <circle class="drop" cx="130" cy="252" r="4" fill="#4f8cff"/>
+    <polygon points="20,296 330,296 346,310 4,310" fill="#4d5563"/>
+    <polygon points="4,310 346,310 346,316 4,316" fill="#2c313b"/>
+    <g stroke="#7b8494" stroke-width="1"><line x1="70" y1="296" x2="56" y2="310"/><line x1="130" y1="296" x2="116" y2="310"/><line x1="190" y1="296" x2="176" y2="310"/><line x1="250" y1="296" x2="236" y2="310"/></g>
+    <g fill="#9aa3b3"><circle cx="20" cy="313" r="3"/><circle cx="175" cy="313" r="3"/><circle cx="330" cy="313" r="3"/></g>
+    <g class="mono" font-size="9" font-weight="700" text-anchor="middle"><g class="coin" style="animation-delay:0s"><circle cx="132" cy="292" r="6" fill="#ff6b0f" stroke="#b84a00"/><text x="132" y="295" fill="#000">$</text></g><g class="coin" style="animation-delay:1s"><circle cx="132" cy="292" r="6" fill="#ff6b0f" stroke="#b84a00"/><text x="132" y="295" fill="#000">$</text></g><g class="coin" style="animation-delay:2s"><circle cx="132" cy="292" r="6" fill="#ff6b0f" stroke="#b84a00"/><text x="132" y="295" fill="#000">$</text></g><g class="coin" style="animation-delay:3s"><circle cx="132" cy="292" r="6" fill="#ff6b0f" stroke="#b84a00"/><text x="132" y="295" fill="#000">$</text></g></g>
+    <text x="300" y="282" text-anchor="middle" font-size="10" font-weight="700" fill="#9fc0ff" class="mono">STRC holders</text>
+    <text x="150" y="262" font-size="10" font-weight="700" fill="#9fc0ff" class="mono">STRC leak</text>
+    <text x="150" y="274" font-size="9" fill="#a7a7a7" class="mono" id="leakRate">--</text>
+  </svg>
+  <div class="resmeta mono">
+    <span><i style="color:#4f82ec">&#9632;</i> USD Reserve <b id="lgRes">--</b></span>
+    <span><i style="color:#9fd4f5">&#9632;</i> USD Cash <b id="lgCash">--</b></span>
+    <span>Total USD <b id="lgTot">--</b></span>
+    <span><i style="color:#ff6b0f">&#9632;</i> MSTR mkt cap <b id="lgMstr">--</b></span>
+    <span>Drained by STRC since load <b id="lgDrain" style="color:#ff6b0f">--</b></span>
+  </div>
+  <div class="note" style="padding:0 8px">USD figures and MSTR market cap: see Sources below &middot; Both tanks share one scale (full = $60B) &middot; ATM flow is illustrative, not modeled &middot; one drop = 1 second of STRC dividends &middot; hover for amounts</div>
+</div>
+<div id="tip" class="mono"></div>
+<div class="grid">
+  <div class="panel wide hero">
+    <div class="label">STRC dividends accrued since you opened this page</div>
+    <div class="value mono" id="sinceLoad">$0.00</div>
+    <div class="note">Illustrative 24/7 accrual &middot; actual payments follow board declaration &amp; business-day schedule</div>
+  </div>
+
+  <div class="panel">
+    <div class="label">Accrued today &middot; all shares</div>
+    <div class="value mono" id="todayAgg">--</div>
+    <div class="note" id="todayPct">--</div>
+  </div>
+  <div class="panel">
+    <div class="label">Accrued today &middot; per share</div>
+    <div class="value mono" id="todayShare">--</div>
+    <div class="note">of ~$0.0329 per full day</div>
+  </div>
+  <div class="panel">
+    <div class="label">Accrued since 1 Nov 2026 (daily regime)</div>
+    <div class="value mono small" id="sinceDaily">--</div>
+    <div class="note" id="daysDaily">--</div>
+  </div>
+  <div class="panel">
+    <div class="label">Accrued year to date 2026 &middot; est.</div>
+    <div class="value mono small" id="ytd">--</div>
+    <div class="note">Blended: 11.50% Jan–Jun, 12.00% Jul–Dec</div>
+  </div>
+</div>
+
+
+
+<div class="grid">
+  <div class="panel"><div class="label">STRC price<span class="flash" style="color:var(--red)">&#9679;</span></div><div class="value mono small" id="price">--</div><div class="note" id="priceYoY">Last close 3-Nov-2026</div></div>
+  <div class="panel"><div class="label">Current dividend rate</div><div class="value mono small" id="rate">--</div><div class="note">Variable &middot; reviewed monthly</div></div>
+  <div class="panel"><div class="label">Shares outstanding</div><div class="value mono small" id="shares">--</div><div class="note">Implied by $8.12B mkt cap</div></div>
+  <div class="panel"><div class="label">Stated amount (par)</div><div class="value mono small" id="par">--</div><div class="note">No issuance below $100 policy</div></div>
+  <div class="panel"><div class="label">STRC market cap</div><div class="value mono small" id="mktcap">--</div><div class="note">strategy.com, 3-Nov-2026</div></div>
+  <div class="panel"><div class="label">Effective yield at $100</div><div class="value mono small" id="yield2">--</div><div class="note">$12 annual / $100</div></div>
+  <div class="panel"><div class="label">Dividend per share / day</div><div class="value mono small" id="dpsDay">--</div><div class="note">$12.00 &divide; 365</div></div>
+  <div class="panel"><div class="label">Dividend per share / year</div><div class="value mono small" id="dpsYr">--</div><div class="note">12% &times; $100 stated</div></div>
+  <div class="panel"><div class="label">All shares per second</div><div class="value mono small" id="aggSec">--</div><div class="note">continuous accrual</div></div>
+  <div class="panel"><div class="label">All shares per minute</div><div class="value mono small" id="aggMin">--</div><div class="note">continuous accrual</div></div>
+  <div class="panel"><div class="label">All shares per hour</div><div class="value mono small" id="aggHour">--</div><div class="note">continuous accrual</div></div>
+  <div class="panel"><div class="label">All shares per day</div><div class="value mono small" id="aggDay">--</div><div class="note">incl. weekends &amp; holidays</div></div>
+  <div class="panel"><div class="label">All shares per month (30d)</div><div class="value mono small" id="aggMo">--</div><div class="note">continuous accrual</div></div>
+  <div class="panel"><div class="label">Annual dividend cost to Strategy</div><div class="value warn mono small" id="aggYr">--</div><div class="note">At current rate &amp; share count</div></div>
+  <div class="panel"><div class="label">1 BTC of dividends lasts</div><div class="value mono small" id="btcDays">--</div><div class="note">at BTC = $100,000 assumption</div></div>
+  <div class="panel"><div class="label">STRC share of annual interest + dividends</div><div class="value mono small" id="stackShare">--</div><div class="note" id="stackNote">--</div></div>
+</div>
+
+<section class="explainer" id="explainer">
+  <h2>How the STRC dividend clock works</h2>
+  <div class="excols">
+    <article><h3>What STRC is</h3><p>STRC is the ticker for Strategy's Variable Rate Series A Perpetual Stretch Preferred Stock, a preferred share with a $100 stated amount. It pays a dividend at a variable rate that Strategy reviews monthly, currently <b id="exRate">12.00%</b>. At $100 stated, that is about $12.00 per share per year, or roughly 3.3 cents per share per day.</p></article>
+    <article><h3>How the daily payments work</h3><p>Under a daily regime approved on 28 October 2026 and effective 1 November 2026, the dividend accrues every calendar day and is paid on the next business day. Dividends are cumulative, but they are payable only when declared by the board from legally available funds. The counters on this page assume continuous accrual, so they illustrate that accrual rather than show actual payment events.</p></article>
+    <article><h3>What the tanks show</h3><p>The <b>blue tank</b> is Strategy's USD assets: the USD Reserve plus USD Cash that the company reports. The <b>orange tank</b> is MSTR, Strategy's common stock, shown by market capitalization. Hover over a tank to see its amount. The <b>leak</b> at the bottom of the blue tank is STRC's dividend bill, dripping out at the rate shown in the headline.</p></article>
+    <article><h3>Why the dollar tank looks small</h3><p>Both tanks use the same scale, with a full tank equal to $60 billion, so the heights are directly comparable. MSTR's market value is roughly ten times Strategy's dollar holdings, so the blue tank looks like a puddle next to it. Strategy's bitcoin holdings are not in either tank.</p></article>
+    <article><h3>What the pipe between the tanks means</h3><p>Strategy's SEC filings show it raises cash by selling MSTR shares through an at-the-market (ATM) program, and part of that cash can go into the USD Reserve. The pipe is a symbol of that relationship. The animation is not a measured flow and its speed means nothing.</p></article>
+    <article><h3>Where the numbers come from</h3><p>USD Reserve and USD Cash come from Strategy's SEC filings or its public dashboard, whichever is newer, and the page states which source and date it is using. MSTR market cap and annual interest and dividends are copied from the dashboard and carry their own date. The accrual counters are calculations from a fixed share count and rate, not live data. In one weekly filing, for 28 September to 4 October 2026, Strategy reported using $142.5 million of the USD Reserve for preferred dividends and debt interest.</p></article>
+  </div>
+  <div class="faq">
+    <h2>Frequently asked questions</h2>
+    <details><summary>Can Strategy's dollar reserve run out?</summary><p>Strategy says its USD assets cover about <b id="exCover">3.3 years</b> of all interest and dividends at current obligations. That is a company-reported snapshot. It changes as the company pays dividends, repurchases stock, raises cash or issues new preferred shares. This page does not predict the reserve's future.</p></details>
+    <details><summary>Is the STRC dividend guaranteed?</summary><p>No. The rate is variable and reviewed monthly. Dividends are cumulative but payable only as declared by the board from legally available funds. STRC is an unsecured preferred security and is not backed by Strategy's bitcoin.</p></details>
+    <details><summary>Are these numbers live?</summary><p>Not tick by tick. The reserve and cash figures update when Strategy files or publishes new numbers, and this page shows the date it is using. The accrual counters run off your device's clock. Treat everything as illustrative and check the original sources before relying on any figure.</p></details>
+    <details><summary>Is this site affiliated with Strategy?</summary><p>No. It is an unofficial, informational project and is not investment advice.</p></details>
+  </div>
+</section>
+
+<section class="sources">
+  <b>Sources:</b> USD Reserve and USD Cash: <span id="srcUsd">--</span>. MSTR market cap, annual interest + dividends and coverage: <a href="https://www.strategy.com/" rel="noopener">strategy.com</a> dashboard (<span id="srcManual">--</span>). Weekly 8-K filings are on <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=0001050446&amp;type=8-K" rel="noopener">SEC EDGAR</a>. STRC share count and rate are as listed in the stats above. Figures are copied or fetched periodically and may lag live data.
+</section>
+
+<div class="ad-sticky" id="adSticky" aria-label="Advertisement"><div class="slot">
+  <span class="tagad">Sample ad</span>
+  <a class="creative c1 on" href="#" onclick="return false"><span class="ic">&#9889;</span><span class="tx">Sample Brokerage<small>0% fees on your first $10k</small></span><span class="cta">Open</span></a>
+  <a class="creative c2" href="#" onclick="return false"><span class="ic">&#128274;</span><span class="tx">Sample Wallet<small>Self-custody, made simple</small></span><span class="cta">Get</span></a>
+  <a class="creative c3" href="#" onclick="return false"><span class="ic">&#128200;</span><span class="tx">Sample Research<small>Weekly preferred-stock briefing</small></span><span class="cta">Join</span></a>
+</div></div>
+
+<footer>
+  <a href="privacy.html" style="color:var(--orange)">Privacy policy</a> &middot; <strong style="color:#fff">Unofficial.</strong> This page is not affiliated with or endorsed by Strategy Inc. Colors are inspired by its public site. 
+  <strong style="color:#8fa5c4">How it works:</strong> $100 stated amount &times; 12.00% annual rate = $12/year = ~3.3 cents per share per day, accruing every calendar day and paid the next business day (daily regime approved 28-Oct-2026, effective 1-Nov-2026). Counters assume ~81.29M shares outstanding and continuous accrual.<br><br>
+  <strong style="color:#8fa5c4">Caveats:</strong> Dividends are cumulative but payable only as declared from legally available funds. Rate is variable and reviewed monthly (cuts limited to 25bps/month plus SOFR decline per company policy). Preferred securities are unsecured and not backed by Strategy's bitcoin. YTD figure assumes 11.50% Jan–Jun and 12.00% Jul–Dec on a constant share count — actuals differ as the ATM program issues new shares. Estimates only, not investment advice. Market data as of 3–4 Nov 2026.
+</footer>
+
+<script src="data.js"></script>
+<script>
+var CONFIG = {
+  statedAmount: 100,          // USD per share
+  annualRate:   0.12,         // 12.00% current
+  shares:       81290000,     // ~$8.123B mkt cap / $99.93
+  price:        99.93,        // close 3-Nov-2026
+  dailyRegimeStart: new Date(2026, 10, 1),   // 1-Nov-2026
+  ytdSchedule: [              // [startDate, endDate-exclusive, annualRate]
+    [new Date(2026,0,1), new Date(2026,6,1), 0.115],
+    [new Date(2026,6,1), new Date(2026,11,31,23,59,59,999), 0.12]
+  ],
+  btcAssumption: 100000,
+  // USD Reserve / Cash: strategy.com dashboard, 5-Nov-2026 10:46 AM ET (copied by hand).
+  // data.js (written by fetch-sec.cjs from SEC 8-Ks) overrides these when its date is newer.
+  usdReserve: 4.789e9,        // USD Reserve
+  usdCash:    133e6,          // USD Cash
+  usdAsOf: '5-Nov-2026 10:46 AM ET',
+  usdAsOfISO: '2026-11-05',
+  usdSource: 'strategy.com dashboard',
+  usdSourceUrl: 'https://www.strategy.com/',
+  // Hand-copied from the same dashboard snapshot (not in SEC filings):
+  annualIntDiv: 1.484e9,      // Annual interest + dividends, all instruments
+  mstrMarketCap: 53.755e9,    // MSTR market cap
+  asOf: '5-Nov-2026 10:46 AM ET',   // date for market cap + annual interest/dividends
+  scaleMax: 60e9              // both tanks share ONE scale: a full tank = $60B (true proportions)
+};
+
+(function(){
+  var d = window.STRC_DATA;
+  if (d && d.usdAsOfISO && d.usdAsOfISO > CONFIG.usdAsOfISO && d.usdReserve > 0 && d.usdCash >= 0) {
+    CONFIG.usdReserve = d.usdReserve; CONFIG.usdCash = d.usdCash;
+    CONFIG.usdAsOf = d.usdAsOf; CONFIG.usdAsOfISO = d.usdAsOfISO;
+    CONFIG.usdSource = 'SEC Form 8-K'; CONFIG.usdSourceUrl = d.sourceUrl || 'https://www.sec.gov/';
+  }
+})();
+var loadTime = Date.now();
+var perShareSec = CONFIG.statedAmount * CONFIG.annualRate / 365 / 86400;
+var aggSec = perShareSec * CONFIG.shares;
+
+function fmt(n, d){ return n.toLocaleString('en-US',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+function fmtMoney(n){ return '$' + fmt(n, 2); }
+function fmtBig(n){ if(n>=1e9) return '$'+fmt(n/1e9,3)+'B'; if(n>=1e6) return '$'+fmt(n/1e6,1)+'M'; if(n>=1e3) return '$'+fmt(n/1e3,2)+'K'; return fmtMoney(n); }
+function midnight(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
+function accrued(from, to){
+  var msBase = 86400000, total=0;
+  for(var i=0;i<CONFIG.ytdSchedule.length;i++){
+    var s=CONFIG.ytdSchedule[i][0], e=CONFIG.ytdSchedule[i][1], r=CONFIG.ytdSchedule[i][2];
+    var a=Math.max(from.getTime(), s.getTime()), b=Math.min(to.getTime(), e.getTime());
+    if(b>a) total += CONFIG.shares*CONFIG.statedAmount*r/365 * ((b-a)/msBase);
+  }
+  return total;
+}
+var O={fb:230,fh:140,dy:-50};
+function setLayer(id,h0,h1){
+  var yb=O.fb-h0, yt=O.fb-h1, d=O.dy;
+  function P(k,pts){document.getElementById(id+k).setAttribute('points',pts);}
+  P('F','40,'+yt+' 220,'+yt+' 220,'+yb+' 40,'+yb);
+  P('S','220,'+yt+' 290,'+(yt+d)+' 290,'+(yb+d)+' 220,'+yb);
+  P('T','40,'+yt+' 220,'+yt+' 290,'+(yt+d)+' 110,'+(yt+d));
+  P('B','110,'+(yt+d)+' 290,'+(yt+d)+' 290,'+(yb+d)+' 110,'+(yb+d));
+}
+function setTag(id,y,txt){
+  var ln=document.getElementById(id+'Ln');
+  ln.setAttribute('y1',y); ln.setAttribute('y2',y);
+  document.getElementById(id+'R').setAttribute('y',y-11);
+  var t=document.getElementById(id+'T'); t.setAttribute('y',y+3); t.textContent=txt;
+}
+function drawTank(){
+  var drained=(Date.now()-loadTime)/1000*aggSec;
+  var res=CONFIG.usdReserve-drained, cash=CONFIG.usdCash;   // drain modeled against reserve
+  var h1=res/CONFIG.scaleMax*O.fh, h2=Math.max(cash/CONFIG.scaleMax*O.fh,1.2);  // cash min 1.2px so it stays visible/hoverable (true height is ~0.3px)
+  setLayer('rs',0,h1); setLayer('cs',h1,h1+h2);
+  setTag('tag',O.fb-h1-h2,fmtBig(res+cash));
+  var hm=CONFIG.mstrMarketCap/CONFIG.scaleMax*O.fh;
+  setLayer('ms',0,hm); setTag('mtag',O.fb-hm+O.dy,fmtBig(CONFIG.mstrMarketCap));
+  document.getElementById('lgRes').textContent=fmtBig(res);
+  document.getElementById('lgCash').textContent=fmtBig(cash);
+  document.getElementById('lgTot').textContent=fmtBig(res+cash);
+  document.getElementById('lgMstr').textContent=fmtBig(CONFIG.mstrMarketCap);
+  document.getElementById('lgDrain').textContent=fmtMoney(drained);
+}
+function initTank(){
+  drawTank();
+  var usd=CONFIG.usdReserve+CONFIG.usdCash, strcYr=aggSec*86400*365;
+  document.getElementById('hlRate').textContent=fmtMoney(aggSec)+'/sec';
+  document.getElementById('hlUsd').textContent=fmtBig(usd);
+  document.getElementById('hlCap').innerHTML='USD assets <b>'+fmtBig(usd)+'</b> (Reserve '+fmtBig(CONFIG.usdReserve)+' + Cash '+fmtBig(CONFIG.usdCash)+') cover about <b>'+fmt(usd/CONFIG.annualIntDiv,1)+' years</b> of all interest and dividends ('+fmtBig(CONFIG.annualIntDiv)+'/yr). STRC alone is about <b>'+fmtBig(strcYr)+'/yr</b>, roughly '+fmt(strcYr/CONFIG.annualIntDiv*100,0)+'% of that bill. USD figures: '+CONFIG.usdSource+', '+CONFIG.usdAsOf+'. Annual obligations: strategy.com, '+CONFIG.asOf+'.';
+  document.getElementById('exRate').textContent=fmt(CONFIG.annualRate*100,2)+'%';
+  document.getElementById('exCover').textContent=fmt(usd/CONFIG.annualIntDiv,1)+' years';
+  document.getElementById('srcUsd').innerHTML='<a href="'+CONFIG.usdSourceUrl+'" rel="noopener">'+CONFIG.usdSource+'</a> ('+CONFIG.usdAsOf+')';
+  document.getElementById('srcManual').textContent=CONFIG.asOf;
+  document.getElementById('leakRate').textContent=fmtMoney(aggSec)+'/sec';
+  var tip=document.getElementById('tip');
+  var texts={
+    res:function(){return '<b>USD Reserve</b><br>'+fmtMoney(CONFIG.usdReserve-(Date.now()-loadTime)/1000*aggSec)+'<br>'+CONFIG.usdSource+', '+CONFIG.usdAsOf+' ('+fmtBig(CONFIG.usdReserve)+', less STRC drain since load)';},
+    cash:function(){return '<b>USD Cash</b><br>'+fmtMoney(CONFIG.usdCash)+'<br>'+CONFIG.usdSource+', '+CONFIG.usdAsOf;},
+    mstr:function(){return '<b>MSTR equity (orange)</b><br>'+fmtMoney(CONFIG.mstrMarketCap)+' market cap<br>strategy.com, '+CONFIG.asOf;},
+    leak:function(){return '<b>STRC dividends</b><br>'+fmtMoney(aggSec)+' / second<br>'+fmtMoney(aggSec*86400)+' / day<br>'+fmtBig(aggSec*86400*365)+' / year<br>= '+fmt(aggSec*86400*365/CONFIG.annualIntDiv*100,0)+'% of Strategy\'s '+fmtBig(CONFIG.annualIntDiv)+' annual interest + dividends';}
+  };
+  var svg=document.getElementById('resSvg');
+  svg.addEventListener('mousemove',function(e){
+    var k=e.target.getAttribute&&e.target.getAttribute('data-tip');
+    if(!k){tip.style.display='none';return;}
+    tip.innerHTML=texts[k](); tip.style.display='block';
+    tip.style.left=Math.min(e.clientX+14,window.innerWidth-250)+'px'; tip.style.top=(e.clientY+14)+'px';
+  });
+  svg.addEventListener('mouseleave',function(){tip.style.display='none';});
+}
+function tick(){
+  var now=new Date(), sec=(Date.now())/1000;
+  var dAgo=['SUN','MON','TUE','WED','THU','FRI','SAT'][now.getDay()];
+  document.getElementById('datetxt').textContent = dAgo+' '+now.toLocaleDateString('en-GB');
+  document.getElementById('timetxt').textContent = now.toLocaleTimeString('en-GB');
+  document.getElementById('sinceLoad').textContent = fmtMoney((Date.now()-loadTime)/1000*aggSec);
+  var todayAmt = aggSec*86400*((now-midnight())/86400000);
+  document.getElementById('todayAgg').textContent = fmtMoney(todayAmt);
+  document.getElementById('todayPct').textContent = fmt((now-midnight())/86400000*100,1)+'% of the day elapsed';
+  document.getElementById('todayShare').textContent = '$'+fmt(perShareSec*86400*((now-midnight())/86400000),5);
+  var sd = accrued(CONFIG.dailyRegimeStart, now);
+  document.getElementById('sinceDaily').textContent = fmtMoney(sd);
+  document.getElementById('daysDaily').textContent = fmt((now-CONFIG.dailyRegimeStart)/86400000,2)+' days since regime start';
+  document.getElementById('ytd').textContent = fmtMoney(accrued(new Date(now.getFullYear(),0,1), now));
+  drawTank();
+  requestAnimationFrame(tick);
+}
+function statics(){
+  document.getElementById('price').textContent = fmtMoney(CONFIG.price);
+  document.getElementById('rate').textContent = (CONFIG.annualRate*100).toFixed(2)+'%';
+  document.getElementById('shares').textContent = fmt(CONFIG.shares/1e6,2)+'M';
+  document.getElementById('par').textContent = fmtMoney(CONFIG.statedAmount);
+  document.getElementById('mktcap').textContent = fmtBig(CONFIG.shares*CONFIG.price);
+  document.getElementById('yield2').textContent = (CONFIG.annualRate/CONFIG.price*100*100).toFixed(2)+'%';
+  document.getElementById('dpsDay').textContent = fmtMoney(perShareSec*86400);
+  document.getElementById('dpsYr').textContent = fmtMoney(CONFIG.statedAmount*CONFIG.annualRate);
+  document.getElementById('aggSec').textContent = fmtMoney(aggSec);
+  document.getElementById('aggMin').textContent = fmtMoney(aggSec*60);
+  document.getElementById('aggHour').textContent = fmtMoney(aggSec*3600);
+  document.getElementById('aggDay').textContent = fmtMoney(aggSec*86400);
+  document.getElementById('aggMo').textContent = fmtBig(aggSec*86400*30);
+  document.getElementById('aggYr').textContent = fmtBig(aggSec*86400*365);
+  document.getElementById('btcDays').textContent = fmt(CONFIG.btcAssumption/(aggSec*86400),2)+' days';
+  document.getElementById('stackShare').textContent = fmt(aggSec*86400*365/CONFIG.annualIntDiv*100,0)+'%';
+  document.getElementById('stackNote').textContent = 'of '+fmtBig(CONFIG.annualIntDiv)+'/yr, strategy.com '+CONFIG.asOf;
+}
+// ADS: leave ADSENSE_PUB empty to show the sample ads. Once AdSense approves the site, set it to
+// your publisher ID (e.g. 'ca-pub-1234567890123456'). The sample bar is then removed and AdSense
+// Auto ads takes over (enable "Anchor ads" in the AdSense dashboard for the mobile sticky footer).
+var ADSENSE_PUB = '';
+(function(){
+  var bar=document.getElementById('adSticky');
+  if(ADSENSE_PUB){
+    if(bar) bar.remove();
+    document.body.style.paddingBottom='0';
+    var m=document.createElement('meta'); m.name='google-adsense-account'; m.content=ADSENSE_PUB; document.head.appendChild(m);
+    var sc=document.createElement('script'); sc.async=true; sc.crossOrigin='anonymous';
+    sc.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(ADSENSE_PUB);
+    document.head.appendChild(sc);
+    return;
+  }
+  var cs=document.querySelectorAll('#adSticky .creative'), i=0;
+  setInterval(function(){ cs[i].classList.remove('on'); i=(i+1)%cs.length; cs[i].classList.add('on'); }, 4000);
+})();
+statics(); initTank(); tick();
+</script>
+</body>
+</html>
