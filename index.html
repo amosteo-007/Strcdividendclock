@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>STRC DIVIDEND CLOCK</title>
+<meta name="google-adsense-account" content="ca-pub-2521507816015645">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2521507816015645"
+     crossorigin="anonymous"></script>
 <style>
   :root{
     --orange:#ff6b0f; --green:#ff6b0f; --amber:#ff6b0f; --bg:#000;
@@ -414,16 +417,13 @@ function statics(){
 // ADS: leave ADSENSE_PUB empty to show the sample ads. Once AdSense approves the site, set it to
 // your publisher ID (e.g. 'ca-pub-1234567890123456'). The sample bar is then removed and AdSense
 // Auto ads takes over (enable "Anchor ads" in the AdSense dashboard for the mobile sticky footer).
-var ADSENSE_PUB = '';
+// The AdSense script and meta tag are now static in <head>, so here we only remove the sample bar.
+var ADSENSE_PUB = 'ca-pub-2521507816015645';
 (function(){
   var bar=document.getElementById('adSticky');
   if(ADSENSE_PUB){
     if(bar) bar.remove();
     document.body.style.paddingBottom='0';
-    var m=document.createElement('meta'); m.name='google-adsense-account'; m.content=ADSENSE_PUB; document.head.appendChild(m);
-    var sc=document.createElement('script'); sc.async=true; sc.crossOrigin='anonymous';
-    sc.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+encodeURIComponent(ADSENSE_PUB);
-    document.head.appendChild(sc);
     return;
   }
   var cs=document.querySelectorAll('#adSticky .creative'), i=0;

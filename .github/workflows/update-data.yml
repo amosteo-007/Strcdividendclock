@@ -1,0 +1,29 @@
+# Refreshes data.js from SEC EDGAR and commits it, which triggers a redeploy on Cloudflare Pages / Netlify.
+# Works when the strc-clock folder is the root of its own GitHub repository.
+# Setup: Repo > Settings > Secrets and variables > Actions > New secret
+#   SEC_USER_AGENT = STRC Dividend Clock your-email@example.com
+name: Update data
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch latest 8-K figures
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+        run: node fetch-sec.cjs
+      - name: Commit if changed
+        run: |
+          git config user.name "data-bot"
+          git config user.email "data-bot@users.noreply.github.com"
+          git add data.js
+          git diff --cached --quiet || (git commit -m "Update USD reserve data" && git push)
