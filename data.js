@@ -6,5 +6,5 @@ window.STRC_DATA = {
   "usdAsOf": "1-Nov-2026",
   "sourceUrl": "https://www.sec.gov/Archives/edgar/data/1050446/000119312526442707/mstr-20261102.htm",
   "filed": "2026-11-02",
-  "fetchedAt": "2026-11-07T05:55:50.061Z"
+  "fetchedAt": "2026-11-07T12:57:27.309Z"
 };
